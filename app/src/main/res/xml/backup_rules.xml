@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Cached QB data is safe to include in backups; it is just re-fetchable trivia data. -->
+</full-backup-content>
