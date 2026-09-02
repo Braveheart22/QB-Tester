@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -31,9 +32,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.qbtester.app.model.NflTeam
 import com.qbtester.app.ui.components.QbHeadshotImage
 import com.qbtester.app.ui.components.TeamBanner
 import com.qbtester.app.ui.components.TeamGradientBackground
+import com.qbtester.app.ui.theme.contrastingOnColor
+import com.qbtester.app.ui.theme.primaryColor
 
 @Composable
 fun QuizScreen(
@@ -134,6 +138,7 @@ private fun QuizInProgressContent(
             ) { reveal ->
                 if (reveal == null) {
                     QuestionInput(
+                        team = team,
                         inputText = state.inputText,
                         feedback = state.feedback,
                         onInputChanged = onInputChanged,
@@ -150,6 +155,7 @@ private fun QuizInProgressContent(
 
 @Composable
 private fun QuestionInput(
+    team: NflTeam,
     inputText: String,
     feedback: AnswerFeedback,
     onInputChanged: (String) -> Unit,
@@ -187,6 +193,14 @@ private fun QuestionInput(
         Button(
             onClick = onSubmit,
             enabled = inputText.isNotBlank(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = team.primaryColor,
+                contentColor = contrastingOnColor(team.primaryColor),
+                // Opaque on purpose - Material3's default disabled colors use a translucent
+                // container, which let the background logo show through the button.
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
             modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
         ) {
             Text("SUBMIT")
