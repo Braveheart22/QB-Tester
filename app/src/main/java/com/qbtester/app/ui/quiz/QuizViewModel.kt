@@ -115,4 +115,14 @@ class QuizViewModel(
     }
 
     fun playAgain() = startQuiz()
+
+    /**
+     * Lets the user stop before finishing all 32 teams. Jumps straight to the results screen
+     * using whatever correct/incorrect/missed totals have accumulated so far - teams never
+     * reached simply aren't counted, same as if the session had only ever had that many teams.
+     */
+    fun endQuizEarly() {
+        if (_uiState.value.phase != QuizPhase.IN_PROGRESS) return
+        _uiState.update { it.copy(phase = QuizPhase.COMPLETE) }
+    }
 }

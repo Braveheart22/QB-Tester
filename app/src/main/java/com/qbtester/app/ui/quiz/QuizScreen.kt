@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +27,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +67,7 @@ fun QuizScreen(
                 onSubmit = viewModel::submitAnswer,
                 onGiveUp = viewModel::giveUp,
                 onContinue = viewModel::continueToNext,
+                onEndQuizEarly = viewModel::endQuizEarly,
             )
             QuizPhase.COMPLETE -> Unit
         }
@@ -106,21 +111,40 @@ private fun QuizInProgressContent(
     onSubmit: () -> Unit,
     onGiveUp: () -> Unit,
     onContinue: () -> Unit,
+    onEndQuizEarly: () -> Unit,
 ) {
     val team = state.currentTeam ?: return
+    var showEndQuizDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(padding)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Question ${state.questionNumber} of ${state.totalQuestions}",
                 style = MaterialTheme.typography.labelLarge,
             )
-            Text(
-                text = "Score: ${state.correctCount} / ${state.resolvedCount}",
-                style = MaterialTheme.typography.labelLarge,
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Score: ${state.correctCount} / ${state.resolvedCount}",
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                TextButton(onClick = { showEndQuizDialog = true }) {
+                    Text("End Quiz", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
+
+        if (showEndQuizDialog) {
+            EndQuizConfirmationDialog(
+                resolvedCount = state.resolvedCount,
+                onConfirm = {
+                    showEndQuizDialog = false
+                    onEndQuizEarly()
+                },
+                onDismiss = { showEndQuizDialog = false },
             )
         }
 
@@ -146,11 +170,39 @@ private fun QuizInProgressContent(
                         onGiveUp = onGiveUp,
                     )
                 } else {
-                    RevealContent(reveal = reveal, onContinue = onContinue)
+                    RevealContent(team = team, reveal = reveal, onContinue = onContinue)
                 }
             }
         }
     }
+}
+
+@Composable
+private fun EndQuizConfirmationDialog(
+    resolvedCount: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("End quiz now?") },
+        text = {
+            val teamWord = if (resolvedCount == 1) "team" else "teams"
+            Text(
+                if (resolvedCount == 0) {
+                    "You haven't answered any teams yet - results will just show 0 / 0."
+                } else {
+                    "You'll see your results for the $resolvedCount $teamWord you've answered so far."
+                }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("End Quiz") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        },
+    )
 }
 
 @Composable
@@ -213,7 +265,7 @@ private fun QuestionInput(
 }
 
 @Composable
-private fun RevealContent(reveal: RevealState, onContinue: () -> Unit) {
+private fun RevealContent(team: NflTeam, reveal: RevealState, onContinue: () -> Unit) {
     val isCorrect = reveal is RevealState.Correct
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -240,7 +292,14 @@ private fun RevealContent(reveal: RevealState, onContinue: () -> Unit) {
             fontWeight = FontWeight.Bold,
         )
 
-        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth(0.7f).padding(top = 28.dp)) {
+        Button(
+            onClick = onContinue,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = team.primaryColor,
+                contentColor = contrastingOnColor(team.primaryColor),
+            ),
+            modifier = Modifier.fillMaxWidth(0.7f).padding(top = 28.dp),
+        ) {
             Text("CONTINUE")
         }
     }

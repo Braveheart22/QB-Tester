@@ -146,4 +146,52 @@ class QuizViewModelTest {
         assertEquals(0, state.incorrectCount)
         assertTrue(state.missedTeams.isEmpty())
     }
+
+    @Test
+    fun `ending the quiz early completes it using only the progress made so far`() {
+        val viewModel = QuizViewModel(FakeQuarterbackRepository())
+
+        // Q1: correct
+        val q1 = viewModel.uiState.value.currentTeam!!.id
+        viewModel.onInputChanged("Starter $q1")
+        viewModel.submitAnswer()
+        viewModel.continueToNext()
+
+        // Q2: give up, then end early without continuing
+        viewModel.giveUp()
+        viewModel.endQuizEarly()
+
+        val state = viewModel.uiState.value
+        assertEquals(QuizPhase.COMPLETE, state.phase)
+        assertEquals(1, state.correctCount)
+        assertEquals(1, state.incorrectCount)
+        assertEquals(2, state.resolvedCount)
+    }
+
+    @Test
+    fun `ending the quiz early before answering anything is a harmless zero result`() {
+        val viewModel = QuizViewModel(FakeQuarterbackRepository())
+
+        viewModel.endQuizEarly()
+
+        val state = viewModel.uiState.value
+        assertEquals(QuizPhase.COMPLETE, state.phase)
+        assertEquals(0, state.resolvedCount)
+        assertEquals(0, state.percentCorrect)
+    }
+
+    @Test
+    fun `ending the quiz early does nothing once it has already completed`() {
+        val allUnavailable = FakeQuarterbackRepository.defaultAllAvailable()
+            .entries.take(1).associate { it.key to it.value }
+        val viewModel = QuizViewModel(FakeQuarterbackRepository(allUnavailable))
+        viewModel.giveUp()
+        viewModel.continueToNext()
+        assertEquals(QuizPhase.COMPLETE, viewModel.uiState.value.phase)
+
+        viewModel.endQuizEarly()
+
+        assertEquals(QuizPhase.COMPLETE, viewModel.uiState.value.phase)
+        assertEquals(1, viewModel.uiState.value.incorrectCount)
+    }
 }
