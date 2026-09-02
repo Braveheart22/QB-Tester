@@ -14,7 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.qbtester.app.model.NflTeam
+import com.qbtester.app.ui.theme.TeamHeaderFontFamily
 import com.qbtester.app.ui.theme.contrastingOnColor
 import com.qbtester.app.ui.theme.primaryColor
 import com.qbtester.app.ui.theme.secondaryColor
@@ -38,7 +40,12 @@ fun TeamBanner(team: NflTeam, modifier: Modifier = Modifier) {
             Text(
                 text = team.fullName.uppercase(),
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontFamily = TeamHeaderFontFamily,
+                // Bebas Neue only ships one (already-bold-looking) weight; forcing Bold on top
+                // of it would trigger synthetic/faux bolding and distort the letterforms.
+                fontWeight = FontWeight.Normal,
+                fontSize = 36.sp,
+                letterSpacing = 1.sp,
                 color = onColor,
                 textAlign = TextAlign.Center,
             )

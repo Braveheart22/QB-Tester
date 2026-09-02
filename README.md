@@ -41,6 +41,15 @@ renders it large, centered, and at low opacity behind the quiz question/reveal s
 on a soft gradient tinted with the team's colors - purely decorative, so a failed load just
 leaves the plain gradient with no fallback asset needed.
 
+**Team name header font** intentionally does *not* use each team's actual wordmark typeface.
+Those are proprietary, custom-built fonts (often commissioned from Nike or a type foundry) that
+are copyrighted and not publicly licensed - unlike a logo, hotlinking wouldn't help here since
+there's no legitimate public source for the font files themselves, and embedding one would mean
+distributing someone else's licensed typeface inside the APK. Instead, `TeamBanner` uses
+**Bebas Neue**, a free, openly-licensed (SIL Open Font License - see `licenses/BebasNeue-OFL.txt`)
+condensed display font with the same bold "sports scoreboard" character, bundled as
+`res/font/bebas_neue_regular.ttf`.
+
 ### Caching and refresh
 
 The last successfully fetched quarterback data is cached locally (DataStore Preferences, as a
