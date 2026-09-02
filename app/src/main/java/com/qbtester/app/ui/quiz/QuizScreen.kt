@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.qbtester.app.ui.components.QbHeadshotImage
 import com.qbtester.app.ui.components.TeamBanner
+import com.qbtester.app.ui.components.TeamGradientBackground
 
 @Composable
 fun QuizScreen(
@@ -120,23 +122,27 @@ private fun QuizInProgressContent(
 
         TeamBanner(team = team)
 
-        AnimatedContent(
-            targetState = state.reveal,
-            transitionSpec = {
-                (fadeIn() + scaleIn(initialScale = 0.92f)) togetherWith fadeOut()
-            },
-            label = "quiz-reveal-transition",
-        ) { reveal ->
-            if (reveal == null) {
-                QuestionInput(
-                    inputText = state.inputText,
-                    feedback = state.feedback,
-                    onInputChanged = onInputChanged,
-                    onSubmit = onSubmit,
-                    onGiveUp = onGiveUp,
-                )
-            } else {
-                RevealContent(reveal = reveal, onContinue = onContinue)
+        Box(modifier = Modifier.fillMaxSize()) {
+            TeamGradientBackground(team = team, modifier = Modifier.fillMaxSize())
+
+            AnimatedContent(
+                targetState = state.reveal,
+                transitionSpec = {
+                    (fadeIn() + scaleIn(initialScale = 0.92f)) togetherWith fadeOut()
+                },
+                label = "quiz-reveal-transition",
+            ) { reveal ->
+                if (reveal == null) {
+                    QuestionInput(
+                        inputText = state.inputText,
+                        feedback = state.feedback,
+                        onInputChanged = onInputChanged,
+                        onSubmit = onSubmit,
+                        onGiveUp = onGiveUp,
+                    )
+                } else {
+                    RevealContent(reveal = reveal, onContinue = onContinue)
+                }
             }
         }
     }

@@ -19,6 +19,14 @@ data class NflTeam(
 ) {
     val fullName: String get() = "$city $name"
 
+    /**
+     * Team logo, loaded at runtime (never bundled into the APK) from ESPN's long-standing public
+     * team-logo CDN, keyed by the same abbreviation used everywhere else in this class. This is
+     * decorative only - if it fails to load there's no meaningful fallback, so callers should just
+     * let it fail silently (see [com.qbtester.app.ui.components.TeamGradientBackground]).
+     */
+    val logoUrl: String get() = "https://a.espncdn.com/i/teamlogos/nfl/500/${id.lowercase()}.png"
+
     companion object {
         val ALL: List<NflTeam> = listOf(
             NflTeam("ARI", "Arizona", "Cardinals", "ARI", 0xFF97233F, 0xFF000000),

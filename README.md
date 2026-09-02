@@ -33,6 +33,14 @@ a broken image.
 it's a static catalog in `NflTeam.kt`, since that data is stable for a season and not worth a
 network round trip.
 
+**Team logos** are a partial exception to "don't bundle trademarked artwork": rather than
+packaging 32 copyrighted logo images into the APK, `NflTeam.logoUrl` points at ESPN's long-
+standing public team-logo CDN (`a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png`) and the app loads
+it at runtime via Coil, the same pattern already used for headshots. `TeamGradientBackground`
+renders it large, centered, and at low opacity behind the quiz question/reveal screens, sitting
+on a soft gradient tinted with the team's colors - purely decorative, so a failed load just
+leaves the plain gradient with no fallback asset needed.
+
 ### Caching and refresh
 
 The last successfully fetched quarterback data is cached locally (DataStore Preferences, as a
